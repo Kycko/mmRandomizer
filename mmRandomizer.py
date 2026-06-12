@@ -2,6 +2,6 @@
 
 from sys import path
 path.append('libs')
-import files as F
+from files import readAll as filesReadAll
 
-files = F.readAll()
+files = filesReadAll()

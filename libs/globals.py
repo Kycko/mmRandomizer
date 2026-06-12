@@ -6,17 +6,18 @@ from sys import exit as SYSEXIT
 files = {'champ' :{'file':'Championships.txt','write':True},
          'tracks':{'file':'Locations.txt'    ,'write':False}}
 
-colors = {'blk':'\033[30m', # black
-          'red':'\033[31m', # red
-          'grn':'\033[32m', # green
-          'ylw':'\033[33m', # yellow
-          'blu':'\033[34m', # blue
-          'mag':'\033[35m', # magenta
-          'cya':'\033[36m', # cyan
-          'wht':'\033[37m', # white
-          'udl':'\033[4m',  # underline
-          'bld':'\033[1m',  # bold
-          'rst':'\033[0m'}  # reset all colors
+colors = {'blk':{'code':'\033[30m'},  # black
+          'red':{'code':'\033[31m'},  # red
+          'grn':{'code':'\033[32m'},  # green
+          'ylw':{'code':'\033[33m'},  # yellow
+          'blu':{'code':'\033[34m'},  # blue
+          'mag':{'code':'\033[35m'},  # magenta
+          'cya':{'code':'\033[36m'},  # cyan
+          'wht':{'code':'\033[37m'},  # white
+          'udl':{'code':'\033[4m' },  # underline
+          'bld':{'code':'\033[1m' },  # bold
+          'rst':{'code':'\033[0m' }}  # reset all colors
+for clr,sub in colors.items(): sub['rpl'] = '$'+clr+'$'
 
 # защита от запуска модуля
 if __name__ == '__main__':
