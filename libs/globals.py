@@ -24,6 +24,24 @@ for clr,sub in colors.items(): sub['rpl'] = '$'+clr+'$'
 # красный bold выглядит лучше
 colors['red']['code'] = colors['bld']['code'] + colors['red']['code']
 
+# eu = Europe / ap = Asia-Pasific (= non-Europe)
+regions = {'Australia'         :'ap',
+           'Belgium'           :'eu',
+           'Brazil'            :'ap',
+           'Canada'            :'ap',
+           'China'             :'ap',
+           'Germany'           :'eu',
+           'Italy'             :'eu',
+           'Japan'             :'ap',
+           'Portugal'          :'eu',
+           'Qatar'             :'ap',
+           'RussianFederation' :'eu',
+           'Singapore'         :'ap',
+           'SouthAfrica'       :'ap',
+           'UK'                :'eu',
+           'UnitedArabEmirates':'ap',
+           'UnitedStates'      :'ap'}
+
 # защита от запуска модуля
 if __name__ == '__main__':
   print  ("This is module, please don't execute.")
