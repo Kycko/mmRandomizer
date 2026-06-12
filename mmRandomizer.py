@@ -2,6 +2,8 @@
 
 from sys import path
 path.append('libs')
-from files import readAll as filesReadAll
+import files as F
 
-files = filesReadAll()
+# значения в files{} = объекты классов типа Championships, Tracks, ...
+files = F.readAll()
+files['champ'].genTracks(files['tracks'])

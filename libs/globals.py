@@ -1,7 +1,7 @@
 from sys import exit as SYSEXIT
 
 # максимальная длина сообщений, показывающих прогресс (stages)
-stageLen = 27
+stageLen = 35
 
 # эти базовые вещи должны быть здесь, в globals
 # write = True для файлов, которые будем изменять
@@ -41,6 +41,15 @@ regions = {'Australia'         :'ap',
            'UK'                :'eu',
            'UnitedArabEmirates':'ap',
            'UnitedStates'      :'ap'}
+
+# 'doubles' defines if the championship can have the same country twice
+# IEC-B == IEC-A
+champs = {'WMC'  :{'roster':'int','doubles':False},
+          'APS'  :{'roster':'ap' ,'doubles':True },
+          'ERS'  :{'roster':'eu' ,'doubles':True },
+          'IGTC' :{'roster':'int','doubles':False},
+          'GTCS' :{'roster':'int','doubles':True },
+          'IEC-A':{'roster':'int','doubles':False}}
 
 # защита от запуска модуля
 if __name__ == '__main__':

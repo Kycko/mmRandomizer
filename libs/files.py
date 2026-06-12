@@ -1,5 +1,7 @@
 from   os      import path  as osPath
 from   sys     import exit  as SYSEXIT
+from   copy    import deepcopy
+import random
 import globalFuncs          as GF
 import globals              as G
 from   output  import progress
@@ -26,7 +28,7 @@ class File():
 
 # per-file classes
 class Championships(File):
-  def read(self):
+  def read     (self):
     super().read()
     self.db = {}
     for line in self.lines:
@@ -35,6 +37,103 @@ class Championships(File):
     # DEBUG
     # for champ,data in self.db.items():
     #   print(champ.ljust(5) + ' : ' + str(data))
+  def genTracks(self,db:Tracks):
+    def _getCounts ():
+      # IEC-B MUST have the same tracks
+      final = {'WMC'  :16,
+               'ERS'  :random.randint(8,11),
+               'GTCS' :random.randint(8,11),
+               'IEC-A':random.randint(8,10)}
+      # APS
+      add = random.randint(1,2) if final['ERS'] < 10 else 1
+      final['APS'] = final['ERS'] + add
+      # IGTC
+      add = random.randint(1,3) if final['GTCS'] < 11 else 2
+      final['IGTC'] = final['GTCS'] + add
+      return final
+    def _crossCheck(countryByID:dict,tracks:dict):
+      # check if the same countries used at the same time
+      def _check(countryByID:dict,tracks:dict):
+        def _collect(countryByID:dict,tracks:dict):
+          final = {}  # {week:countries[]}
+          for champ,trackList in tracks.items():
+            racesCount = len(trackList)
+            startWeek  = self.db[champ]['startWeek']
+            endWeek    = self.db[champ]['endWeek']
+            for index,ID in enumerate(trackList):
+              country = countryByID[ID]
+              week    = startWeek
+              if racesCount > 1:
+                week += round((index / (racesCount-1)) * (endWeek-startWeek))
+              if week not in final: final[week] = []
+              final[week].append(country)
+          return final
+        year = _collect(countryByID,tracks)
+        for week,countries in year.items():
+          # don't allow doubles in one week
+          if len(countries) != len(set(countries)): return False
+          # don't allow doubles in two weeks
+          next = week + 1
+          if     next    in year.keys():
+            for  country in countries:
+              if country in year[next]: return False
+        return True
+      if not tracks: return False
+      return _check(countryByID,tracks)
+    def _getTracks (dbroster:dict,champ:str,count:int):
+      def _getAllowed(main:list,added:list,halfnum:int):
+        # main  = страны главного ростера; added = countries
+        def _trim(added:list,half:int):
+          # обрезает added для проверки стран
+          # не допускает одну страну в рамках одной половины сезона
+          # + чтобы между гонками в одной стране было минимум две других
+          lenAdded = len(added)
+          if   lenAdded < half  : trim = 0
+          elif lenAdded > half+1: trim = half
+          else                  : trim = lenAdded-2
+          return added[trim:]
+        final = []
+        for  country in main:
+          if country not in _trim(added,halfnum): final.append(country)
+        return final
+      final     = []
+      countries = []
+      halfnum   = round(count/2)
+      doubles   = G.champs[champ]['doubles']
+      roster    = deepcopy(dbroster[G.champs[champ]['roster']])
+
+      for i in range(count):
+        allowed = _getAllowed(list(roster.keys()),countries,halfnum)
+        country = random.choice   (allowed)
+        index   = random.randrange(len(roster[country]))
+        ID      = roster[country].pop(index)
+        if not doubles or not roster[country] or country in countries:
+          roster.pop(country)
+        countries.append(country)
+        final    .append(ID)
+      return final
+    def _save      (tracks  :dict):
+      for line in self.lines:
+        line['Locations'] = ';'.join(tracks[line['Acronym']])
+    def _debug     (champ   :str,tracks:dict):
+      msg  = champ.ljust(5)
+      msg += ' {' + str(len(tracks[champ])).ljust(2) + '} '
+      msg += str(tracks[champ])
+      print(msg)
+
+    progress.stage('genTracks')
+    tracks  = {}  # to pass through the first 'while'
+    rCounts = _getCounts()  # don't reroll it in each while loop
+    while not _crossCheck(db.byID,tracks):
+      # print(); print('-------------------------') # DEBUG
+      tracks = {}
+      for champ,count in rCounts.items():
+        tracks[champ] = _getTracks(db.roster,champ,count)
+        # _debug(champ,tracks)
+    tracks['IEC-B'] = tracks['IEC-A'] # должны быть одинаковы!!
+    _save(tracks)
+    progress.status(True)
+    # for champ in G.champs.keys(): _debug(champ,tracks)  # DEBUG
 class Tracks       (File):
   def read(self):
     def _roster():
@@ -66,8 +165,10 @@ class Tracks       (File):
     #     print('   ' + country + ' : ' + str(tracks))
 
 # functions for multiple files
-def readAll():
-  def _preCheck(dir  :str ):
+def checkFile(path:str):  # проверяет наличие файла
+  return osPath.isfile(path)
+def readAll  ():
+  def _preCheck(dir:str):
     def _error     (errObj:dict,final:bool):
       progress.status(False)
       GF.error(**errObj)
@@ -107,8 +208,6 @@ def readAll():
   for file in files.values(): file.read()
   progress.status(True)
   return files
-def checkFile(path:str):  # проверяет наличие файла
-  return osPath.isfile(path)
 
 # защита от запуска модуля
 if __name__ == '__main__':
