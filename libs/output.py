@@ -7,7 +7,7 @@ import strings         as S
 origPrint = print
 
 # обычный print(), но с расцветкой
-def print(obj,newLine=True):
+def print(obj='',newLine=True):
   # obj может быть ЛИБО строкой, ЛИБО списком[]
   # список[] = список ключей из S.msg{}
   # newLine = False оставляет каретку в конце этой же строки

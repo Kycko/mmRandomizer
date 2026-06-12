@@ -1,18 +1,19 @@
-from   os      import path  as osPath
-from   sys     import exit  as SYSEXIT
-from   copy    import deepcopy
 import random
-import globalFuncs          as GF
-import globals              as G
-from   output  import progress
+from   copy    import deepcopy
+from   os      import path as osPath
+from   sys     import exit as SYSEXIT
+import globalFuncs         as GF
+import globals             as G
+import output              as O
+import strings             as S
 
 # shared class
 class File():
   def __init__(self,dir:str,file:str,write:bool):
-    self.name      = file
-    self.path      = osPath.join(dir ,file)
-    self.writePath = osPath.join('./',file)
-    self.write     = write
+    self.name       = file
+    self.path       = osPath.join(dir ,file)
+    self.writePath  = osPath.join('./',file)
+    self.finalWrite = write # будем ли записывать итоги
   def read    (self):
     def _parse():
       self.lines = []
@@ -25,6 +26,15 @@ class File():
     with  open(self.path,'r',encoding='utf-8') as f:
       self.raw = [line.strip() for line in f]
     _parse()
+  def write   (self):
+    def _write(lines:list):
+      with open(self.writePath,'w',encoding='utf-8') as f:
+        for line in lines: f.write(f'{line}\n')
+    final = [','.join(self.titles)]
+    for line in self.lines:
+      joined = ','.join(list(line.values()))
+      final.append(joined)
+    _write(final)
 
 # per-file classes
 class Championships(File):
@@ -121,7 +131,7 @@ class Championships(File):
       msg += str(tracks[champ])
       print(msg)
 
-    progress.stage('genTracks')
+    O.progress.stage('genTracks')
     tracks  = {}  # to pass through the first 'while'
     rCounts = _getCounts()  # don't reroll it in each while loop
     while not _crossCheck(db.byID,tracks):
@@ -132,7 +142,7 @@ class Championships(File):
         # _debug(champ,tracks)
     tracks['IEC-B'] = tracks['IEC-A'] # должны быть одинаковы!!
     _save(tracks)
-    progress.status(True)
+    O.progress.status(True)
     # for champ in G.champs.keys(): _debug(champ,tracks)  # DEBUG
 class Tracks       (File):
   def read(self):
@@ -170,7 +180,7 @@ def checkFile(path:str):  # проверяет наличие файла
 def readAll  ():
   def _preCheck(dir:str):
     def _error     (errObj:dict,final:bool):
-      progress.status(False)
+      O.progress.status(False)
       GF.error(**errObj)
     def _getClass  (key   :str):
       match key:
@@ -192,7 +202,7 @@ def readAll  ():
         _error({'key':errKey,'extra':fList},
                key == 'write')
 
-    progress.stage('preCheck')
+    O.progress.stage('preCheck')
     if not osPath.isdir(dir): _error({'key':'argIsNotDir'},False)
     files = {'read':{},'write':{}}
     for key,obj in G.files.items():
@@ -201,13 +211,26 @@ def readAll  ():
       if obj['write']: files['write'][key] = fileObj
     _checkFiles(files,'read')
     _checkFiles(files,'write')
-    progress.status(True)
+    O.progress.status(True)
     return files['read']
   files = _preCheck(GF.getArg())
-  progress.stage('read')
+  O.progress.stage('read')
   for file in files.values(): file.read()
-  progress.status(True)
+  O.progress.status(True)
   return files
+def writeAll (files:dict):
+  def _print (created:list):
+    O.print()
+    O.print(S.separator)
+    for msg  in S.msg['info']['final']: O.print(msg)
+    for file in created               : O.print('   ' + file)
+
+  O.progress.stage('write')
+  created = []
+  for  file in files.values():
+    if file.finalWrite: file.write(); created.append(file.name)
+  O.progress.status(True)
+  _print(created)
 
 # защита от запуска модуля
 if __name__ == '__main__':
