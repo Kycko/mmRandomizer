@@ -1,5 +1,8 @@
 from sys import exit as SYSEXIT
 
+# максимальная длина сообщений, показывающих прогресс (stages)
+stageLen = 27
+
 # эти базовые вещи должны быть здесь, в globals
 # write = True для файлов, которые будем изменять
 #   остальные просто читаем для получения доп. данных
@@ -18,6 +21,8 @@ colors = {'blk':{'code':'\033[30m'},  # black
           'bld':{'code':'\033[1m' },  # bold
           'rst':{'code':'\033[0m' }}  # reset all colors
 for clr,sub in colors.items(): sub['rpl'] = '$'+clr+'$'
+# красный bold выглядит лучше
+colors['red']['code'] = colors['bld']['code'] + colors['red']['code']
 
 # защита от запуска модуля
 if __name__ == '__main__':

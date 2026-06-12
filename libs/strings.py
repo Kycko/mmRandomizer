@@ -1,6 +1,9 @@
-from sys import exit as SYSEXIT
+from sys     import exit as SYSEXIT
+from globals import stageLen
 
-separator = '-'*25
+separator = '-' * stageLen
+
+status = {True:'$grn$OK$rst$',False:'$red$FAILED$rst$'}
 
 msg = {
   'errors':{
@@ -8,7 +11,10 @@ msg = {
     'argIsNotDir'  :'$red$Это не каталог$rst$',
     'noFilesToRead':'$red$Эти файлы не найдены в указанном каталоге$rst$:',
     'rmFilesToRun' :'$red$Для запуска уберите эти файлы из текущего каталога$rst$:'
-    }
+    },
+  'stages':{
+    'preCheck'     :'Предварительные проверки'
+  }
   }
 
 # защита от запуска модуля
