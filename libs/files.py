@@ -148,19 +148,19 @@ class Championships(File):
     def _debug (final:dict):
       def _count(rules:list):
         final = []
-        for i,name in G.gen.banParts.items():
-          if str(i) in list(rules.values()): final.append(name)
+        for  i,name in G.gen.banParts.items():
+          if str(i) in rules: final.append(name)
         return final
       print(); print()
       for champ,rules in final.items():
         ####### общий список правил
-        print(champ.ljust(5) + ' : ' + str([int(val) for val in rules.values()]))
+        # print(champ.ljust(5) + ' : ' + str([int(val) for val in rules.values()]))
         ####### количество запретов (разработки деталей) в разбивке по чемпионатам
-        # parts = _count(rules)
-        # msg   = champ.ljust(5) + ' : '
-        # msg  += str(len(parts)).rjust(3)
-        # if parts: msg += ' ' + str(parts)
-        # print(msg)
+        parts = _count(rules)
+        msg   = champ.ljust(5) + ' : '
+        msg  += str(len(parts)).rjust(3)
+        if parts: msg += ' ' + str(parts)
+        print(msg)
       print()
     O.progress.stage('genRules')
     final = {champ:db.gen(champ) for champ in G.champList}
@@ -228,6 +228,7 @@ class Rules        (File):
       for  group in db.keys():
         if group.startswith('Spec'): final[group] = self.groups[group]
       _run(db,champ,final)
+      return _bansCount(db)
     def _ERSenabled(db:dict):
       ERSkey = 'EnergyRecoverySystem'
       return ERSkey in db.keys() and db[ERSkey] != '76'
@@ -235,7 +236,9 @@ class Rules        (File):
     final = {}
     _run(final,champ,self.groups)
 
-    while _bansCount(final) > 3: _regenParts(final,champ)
+    bCount = _bansCount(final)
+    while                   bCount > 3: bCount = _regenParts(final,champ)
+    while 'GT' in champ and bCount > 2: bCount = _regenParts(final,champ)
     if   _ERSenabled(final) and 'HybridPower' not in final.keys():
       # дождались генерации ERS, теперь можно добавлять
       _run(final,champ,{'HybridPower':self.groups['HybridPower']})

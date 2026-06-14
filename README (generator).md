@@ -105,7 +105,10 @@ You can change this weights by editing the `libs/globalsGenerator.py` file, `rul
 
 ### Car parts
 
-Additional check: each championship should have no more than 3 special parts.
+Additional check:
+
+* GT series should have no more than 2 special parts
+* Other championships should have no more than 3 special parts
 
 | rule                | WMC  | APC  | ERS  | IGTC | GTCS | IEC-A | IEC-B |
 | ---                 | ---  | ---  | ---  | ---  | ---  | ---   | ---   |
