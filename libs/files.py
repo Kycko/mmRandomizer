@@ -1,10 +1,13 @@
 import random
 from   copy    import deepcopy
+from   csv     import DictReader
 from   os      import path as osPath
 from   sys     import exit as SYSEXIT
 import globalFuncs         as GF
 import globals             as G
+import listFuncs           as LF
 import output              as O
+import stringFuncs         as SF
 import strings             as S
 
 # shared class
@@ -15,17 +18,10 @@ class File():
     self.writePath  = osPath.join('./',file)
     self.finalWrite = write # будем ли записывать итоги
   def read    (self):
-    def _parse():
-      self.lines = []
-      self.titles = self.raw[0].split(',')
-      for line in self.raw[1:]:
-        final    = {}
-        splitted = line.split(',')
-        for i in range(len(splitted)): final[self.titles[i]] = splitted[i]
-        self.lines.append(final)
     with  open(self.path,'r',encoding='utf-8') as f:
-      self.raw = [line.strip() for line in f]
-    _parse()
+      csv = DictReader(f)
+      self.titles = csv.fieldnames
+      self.lines  = [dict(line) for line in csv]
   def write   (self):
     def _write(lines:list):
       with open(self.writePath,'w',encoding='utf-8') as f:
@@ -45,8 +41,10 @@ class Championships(File):
       self.db[line['Acronym']] = {'startWeek':int(line['Season Start']),
                                   'endWeek'  :int(line['Season End'])}
     # DEBUG
+    # print(); print()
     # for champ,data in self.db.items():
     #   print(champ.ljust(5) + ' : ' + str(data))
+    # print()
   def genTracks(self,db:Tracks):
     def _getCounts ():
       # IEC-B MUST have the same tracks
@@ -109,8 +107,8 @@ class Championships(File):
       final     = []
       countries = []
       halfnum   = round(count/2)
-      doubles   = G.champs[champ]['doubles']
-      roster    = deepcopy(dbroster[G.champs[champ]['roster']])
+      doubles   = G.gen.champs[champ]['doubles']
+      roster    = deepcopy(dbroster[G.gen.champs[champ]['roster']])
 
       for i in range(count):
         allowed = _getAllowed(list(roster.keys()),countries,halfnum)
@@ -143,15 +141,95 @@ class Championships(File):
     tracks['IEC-B'] = tracks['IEC-A'] # должны быть одинаковы!!
     _save(tracks)
     O.progress.status(True)
-    # for champ in G.champs.keys(): _debug(champ,tracks)  # DEBUG
+    # for champ in G.gen.champs.keys(): _debug(champ,tracks)  # DEBUG
+  def genRules (self,db:Rules ):  # описания в 'Rule Changes.txt'
+    def _debug (final:dict):
+      def _count(rules:list):
+        final = []
+        for i,name in G.gen.banParts.items():
+          if str(i) in list(rules.values()): final.append(name)
+        return final
+      print(); print()
+      for champ,rules in final.items():
+        ####### общий список правил
+        print(champ.ljust(5) + ' : ' + str([int(val) for val in rules.values()]))
+        ####### количество запретов (разработки деталей) в разбивке по чемпионатам
+        # parts = _count(rules)
+        # msg   = champ.ljust(5) + ' : '
+        # msg  += str(len(parts)).rjust(3)
+        # if parts: msg += ' ' + str(parts)
+        # print(msg)
+      print()
+    O.progress.stage('genRules')
+    final = {champ:db.gen(champ) for champ in G.champList}
+
+    champ = 'IEC-B' # он копирует большинство правил из IEC-A
+    for group,val in final[champ].items():
+      if val == G.gen.copySign:
+        final[champ][group] = final['IEC-A'][group]
+
+    O.progress.status(True)
+    _debug(final) # внутри есть ДВА РАЗНЫХ ВАРИАНТА
+class Rules        (File):
+  def read(self):
+    def _groups():
+      self.groups = {}
+      for rule in self.lines:
+        group = rule['Rule Group']
+        if group not in self.groups.keys(): self.groups[group] = []
+        self.groups[group].append(rule['ID'])
+    super().read()
+    _groups()
+
+    # DEBUG
+    # print(); print()
+    # for group,ids in self.groups.items():
+    #   print('   ' + group + ' : ' + str(ids))
+    # print()
+  def gen (self,champ:str):
+    def _run(db:dict,champ:str,groups:dict):
+      def _get(group:str,IDs:list,champ:str):
+        def _weights(group:str,champ:str,IDs:list):
+          # подгоняет веса под порядок IDs, поэтому здесь формат ID:вес
+          db = G.gen.rules
+          if group in db.keys():
+            if db[group][champ] == G.gen.copySign: return G.gen.copySign
+            return [db[group][champ][id] for id in IDs]
+        if   group == 'RaceLength' and 'IEC' in champ: return None
+        elif group.startswith('Spec'):
+          end  = SF.checkSubs(group,['GT','GET'],'e')
+          bad1 = not end      and SF.checkSubs(champ,['GT','IEC'])
+          bad2 = end == 'GT'  and 'GT'  not in champ
+          bad3 = end == 'GET' and 'IEC' not in champ
+          if bad1 or bad2 or bad3: return None
+
+        w = _weights(group,champ,IDs)
+        if   w == G.gen.copySign: return w
+        elif w is not None  : return LF.random_byWeight(IDs,w)
+      for group,IDs in groups.items():
+        res = _get(group,IDs,champ)
+        if res is not None: db[group] = res
+    def _bansCount (db:dict):
+      final = 0
+      for num in list(G.gen.banParts.keys()):
+        if str(num) in list(db.values()): final += 1
+      # print('------- COUNT: ' + str(final)) # DEBUG
+      return final
+    def _regenParts(db:dict,champ:str):
+      # генерирует запреты на разработку заново
+      # если проверка не пройдена
+      final = {}
+      for  group in db.keys():
+        if group.startswith('Spec'): final[group] = self.groups[group]
+      _run(db,champ,final)
+
+    final = {}
+    _run(final,champ,self.groups)
+    while _bansCount(final) > 3: _regenParts(final,champ)
+    return final
 class Tracks       (File):
   def read(self):
     def _roster():
-      def _add (country:str,ID:str,region:str):
-        # region = eu/ap/int
-        rg = self.roster[region]
-        if country not in rg.keys(): rg[country] = []
-        rg[country].append(ID)
       # roster format = eu:{Italy:[3,5,7],Germany:...}
       self.roster = {'eu' :{},  # Europe
                      'ap' :{},  # Asia-Pacific (= non-Europe)
@@ -164,15 +242,19 @@ class Tracks       (File):
         self.byID[ID] = country
 
         for reg in (G.regions[country],'int'):
-          _add(country,ID,reg)
+          rg = self.roster[reg]
+          if country not in rg.keys(): rg[country] = []
+          rg[country].append(ID)
     super().read()
     _roster()
 
     # DEBUG
+    # print(); print()
     # for r,reg in self.roster.items():
     #   print('----- ' + r)
     #   for country,tracks in reg.items():
     #     print('   ' + country + ' : ' + str(tracks))
+    # print()
 
 # functions for multiple files
 def checkFile(path:str):  # проверяет наличие файла
@@ -185,6 +267,7 @@ def readAll  ():
     def _getClass  (key   :str):
       match key:
         case 'champ' : return Championships
+        case 'rules' : return Rules
         case 'tracks': return Tracks
         case _       : return File
     def _checkFiles(files :dict,key  :str):

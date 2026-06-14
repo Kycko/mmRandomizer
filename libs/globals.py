@@ -1,14 +1,18 @@
-from sys import exit as SYSEXIT
+from   sys import exit  as SYSEXIT
+import globalsGenerator as gen
 
-# максимальная длина сообщений, показывающих прогресс (stages)
+######### максимальная длина сообщений, показывающих прогресс (stages)
 stageLen = 35
 
 # эти базовые вещи должны быть здесь, в globals
 # write = True для файлов, которые будем изменять
 #   остальные просто читаем для получения доп. данных
+# ПРИ ДОБАВЛЕНИИ ФАЙЛОВ ОБЯЗАТЕЛЬНО ДОБАВИТЬ В F.readAll()._preCheck()._getClass()
 files = {'champ' :{'file':'Championships.txt','write':True},
+         'rules' :{'file':'Rule Changes.txt' ,'write':False},
          'tracks':{'file':'Locations.txt'    ,'write':False}}
 
+######### цвета
 colors = {'blk':{'code':'\033[30m'},  # black
           'red':{'code':'\033[31m'},  # red
           'grn':{'code':'\033[32m'},  # green
@@ -24,6 +28,7 @@ for clr,sub in colors.items(): sub['rpl'] = '$'+clr+'$'
 # красный bold выглядит лучше
 colors['red']['code'] = colors['bld']['code'] + colors['red']['code']
 
+######### страны/регионы
 # eu = Europe / ap = Asia-Pasific (= non-Europe)
 regions = {'Australia'         :'ap',
            'Belgium'           :'eu',
@@ -42,14 +47,8 @@ regions = {'Australia'         :'ap',
            'UnitedArabEmirates':'ap',
            'UnitedStates'      :'ap'}
 
-# 'doubles' defines if the championship can have the same country twice
-# IEC-B == IEC-A
-champs = {'WMC'  :{'roster':'int','doubles':False},
-          'APS'  :{'roster':'ap' ,'doubles':True },
-          'ERS'  :{'roster':'eu' ,'doubles':True },
-          'IGTC' :{'roster':'int','doubles':False},
-          'GTCS' :{'roster':'int','doubles':True },
-          'IEC-A':{'roster':'int','doubles':False}}
+# чемпионаты
+champList = [abbr for abbr in gen.champs.keys()] + ['IEC-B']
 
 # защита от запуска модуля
 if __name__ == '__main__':

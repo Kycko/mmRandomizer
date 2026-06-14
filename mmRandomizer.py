@@ -6,5 +6,6 @@ import files as F
 
 # значения в files{} = объекты классов типа Championships, Tracks, ...
 files = F.readAll()
-files['champ'].genTracks(files['tracks'])
-F.writeAll(files)
+# files['champ'].genTracks(files['tracks'])
+files['champ'].genRules (files['rules'])
+# F.writeAll(files)

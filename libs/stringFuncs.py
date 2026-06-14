@@ -1,6 +1,20 @@
 from sys     import exit   as SYSEXIT
 from globals import colors as Gcolors
 
+# поиск
+def checkSubs(string:str,subs:list,side=''):
+  # ищет по порядку слова из subs в string
+  # возвращает первое найденное, иначе возвращает ''
+  # side задаёт поиск только в начале/конце:
+  #   side = 's' (start) / 'e' (end) / '' (в любом месте)
+  for sub in subs:
+    res = string.split(sub)
+    if len(res) > 1:
+      start = side == 's' and not res[0]
+      end   = side == 'e' and not res[-1]
+      if not side or start or end: return sub
+  return ''
+
 # преобразование
 def cutColors(string:str):  # вырезает из строки все цвета
   # можно использовать для правильного подсчёта длины строки
