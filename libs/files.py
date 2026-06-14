@@ -45,6 +45,11 @@ class Championships(File):
     # for champ,data in self.db.items():
     #   print(champ.ljust(5) + ' : ' + str(data))
     # print()
+  def save     (self,type:str,data:dict):
+    # это не запись в файл, это сохранение в основное хранилище
+    for line in self.lines:
+      # print(data[line['Acronym']])  # DEBUG
+      line[type] = ';'.join(data[line['Acronym']])
   def genTracks(self,db:Tracks):
     def _getCounts ():
       # IEC-B MUST have the same tracks
@@ -120,9 +125,6 @@ class Championships(File):
         countries.append(country)
         final    .append(ID)
       return final
-    def _save      (tracks  :dict):
-      for line in self.lines:
-        line['Locations'] = ';'.join(tracks[line['Acronym']])
     def _debug     (champ   :str,tracks:dict):
       msg  = champ.ljust(5)
       msg += ' {' + str(len(tracks[champ])).ljust(2) + '} '
@@ -139,7 +141,7 @@ class Championships(File):
         tracks[champ] = _getTracks(db.roster,champ,count)
         # _debug(champ,tracks)
     tracks['IEC-B'] = tracks['IEC-A'] # должны быть одинаковы!!
-    _save(tracks)
+    self.save('Locations',tracks)
     O.progress.status(True)
     # for champ in G.gen.champs.keys(): _debug(champ,tracks)  # DEBUG
   def genRules (self,db:Rules ):  # описания в 'Rule Changes.txt'
@@ -168,8 +170,10 @@ class Championships(File):
       if val == G.gen.copySign:
         final[champ][group] = final['IEC-A'][group]
 
+    for champ,rules in final.items(): final[champ] = list(rules.values())
+    self.save('Rules',final)
     O.progress.status(True)
-    _debug(final) # внутри есть ДВА РАЗНЫХ ВАРИАНТА
+    # _debug(final) # внутри есть ДВА РАЗНЫХ ВАРИАНТА
 class Rules        (File):
   def read(self):
     def _groups():
@@ -195,7 +199,9 @@ class Rules        (File):
           if group in db.keys():
             if db[group][champ] == G.gen.copySign: return G.gen.copySign
             return [db[group][champ][id] for id in IDs]
-        if   group == 'RaceLength' and 'IEC' in champ: return None
+        if   group ==  'RaceLength' and 'IEC' in champ: return None
+        elif group in ('TimedRaces','DrivingLimit') and 'IEC' not in champ:
+          return None
         elif group.startswith('Spec'):
           end  = SF.checkSubs(group,['GT','GET'],'e')
           bad1 = not end      and SF.checkSubs(champ,['GT','IEC'])
@@ -207,6 +213,7 @@ class Rules        (File):
         if   w == G.gen.copySign: return w
         elif w is not None  : return LF.random_byWeight(IDs,w)
       for group,IDs in groups.items():
+        if group == 'HybridPower' and not _ERSenabled(db): continue
         res = _get(group,IDs,champ)
         if res is not None: db[group] = res
     def _bansCount (db:dict):
@@ -216,16 +223,23 @@ class Rules        (File):
       # print('------- COUNT: ' + str(final)) # DEBUG
       return final
     def _regenParts(db:dict,champ:str):
-      # генерирует запреты на разработку заново
-      # если проверка не пройдена
+      # генерирует запреты на разработку заново, если проверка не пройдена
       final = {}
       for  group in db.keys():
         if group.startswith('Spec'): final[group] = self.groups[group]
       _run(db,champ,final)
+    def _ERSenabled(db:dict):
+      ERSkey = 'EnergyRecoverySystem'
+      return ERSkey in db.keys() and db[ERSkey] != '76'
 
     final = {}
     _run(final,champ,self.groups)
+
     while _bansCount(final) > 3: _regenParts(final,champ)
+    if   _ERSenabled(final) and 'HybridPower' not in final.keys():
+      # дождались генерации ERS, теперь можно добавлять
+      _run(final,champ,{'HybridPower':self.groups['HybridPower']})
+
     return final
 class Tracks       (File):
   def read(self):

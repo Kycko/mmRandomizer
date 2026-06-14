@@ -13,6 +13,8 @@ Some things are changed but not randomized, for example the number of teams in e
 
 All these changes lead to a more interesting play each time you create the new career.
 
+See the more in-depth description in the `README (generator).md` file.
+
 # Usage
 
 1. Extract all the text assets from the original `resources.assets` file. You can use any tool for this purpose or my another script: https://github.com/Kycko/mmExtractor;
