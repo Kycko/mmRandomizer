@@ -179,7 +179,8 @@ class Championships(File):
     self.save('Rules',final)
     O.progress.status(True)
     # _debug(final) # внутри есть ДВА РАЗНЫХ ВАРИАНТА
-  def moveTeams(self):  # moves the teams to get the final 12-10-8
+  def moveTeams(self,fileChassis:Chassis):
+    # moves the teams to get the final 12-10-8
     def _getDB ():      # collect all the teams by category
       final = {}        # {OW:[2,...,31],GT:[32,...,51]}
       for line in self.lines:
@@ -192,18 +193,27 @@ class Championships(File):
       return final
     O.progress.stage('moveTeams')
     final = {}
+    teams = {}
     db    = _getDB()
     for champ,conf in G.gen.champs.items():
       if 'teams' in conf:
         final[champ] = []
         for i in range(conf['teams']):
-          final[champ].append(db[conf['series']].pop(0))
+          teamID = db[conf['series']].pop(0)
+          teams[str(teamID)] = str(conf['ID'])
+          final[champ].append(teamID)
+    fileChassis.moveTeams(teams)
     self.save('Teams',final)
     O.progress.status(True)
 
     # DEBUG
     # for champ,teams in final.items():
     #   print(champ.ljust(5) + ' : ' + str(teams))
+class Chassis      (File):
+  def moveTeams(self,IDs:dict):
+    for line in self.lines:
+      if line['Team'] in IDs.keys():
+        line['Championship ID'] = IDs[line['Team']]
 class Rules        (File):
   def read(self):
     def _groups():
@@ -313,10 +323,11 @@ def readAll  ():
       GF.error(**errObj)
     def _getClass  (key   :str):
       match key:
-        case 'champ' : return Championships
-        case 'rules' : return Rules
-        case 'tracks': return Tracks
-        case _       : return File
+        case 'champ'  : return Championships
+        case 'chassis': return Chassis
+        case 'rules'  : return Rules
+        case 'tracks' : return Tracks
+        case _        : return File
     def _checkFiles(files :dict,key  :str):
       res = []
       for file in files[key].values():

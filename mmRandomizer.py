@@ -12,7 +12,7 @@ files = F.readAll()
 O.progress.stageTitle('ttlGen')
 files['champ'].genTracks(files['tracks'])
 files['champ'].genRules (files['rules'])
-files['champ'].moveTeams()
+files['champ'].moveTeams(files['chassis'])
 
 O.progress.stageTitle('ttlFin')
 F.writeAll(files)

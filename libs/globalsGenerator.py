@@ -8,23 +8,28 @@ copySign = '$copy$'
 # 'doubles' = can have two races in one country
 # DON'T CHANGE the number of teams for IEC!
 # calendars for IEC-A & IEC-B SHOULD BE ALWAYS FULLY EQUAL!
-champs = {'WMC'  :{'series':'OW',   # open wheels
+champs = {'WMC'  :{'ID'    :0,
+                   'series':'OW',   # open wheels
                    'teams' :12,
                    'tracks':{'roster':'int','doubles':False}},
-          'APS'  :{'series':'OW',
+          'APS'  :{'ID'    :1,
+                   'series':'OW',
                    'teams' :10,
                    'tracks':{'roster':'ap' ,'doubles':True}},
-          'ERS'  :{'series':'OW',
+          'ERS'  :{'ID'    :2,
+                   'series':'OW',
                    'teams' :8,
                    'tracks':{'roster':'eu' ,'doubles':True}},
-          'IGTC' :{'series':'GT',   # GT
+          'IGTC' :{'ID'    :3,
+                   'series':'GT',   # GT
                    'teams' :11,
                    'tracks':{'roster':'int','doubles':False}},
-          'GTCS' :{'series':'GT',
+          'GTCS' :{'ID'    :4,
+                   'series':'GT',
                    'teams' :9,
                    'tracks':{'roster':'int','doubles':True}},
-          'IEC-A':{'tracks':{'roster':'int','doubles':False}},
-          'IEC-B':{'tracks':None}}
+          'IEC-A':{'ID':5,'tracks':{'roster':'int','doubles':False}},
+          'IEC-B':{'ID':6,'tracks':None}}
 
 ######### IDs for banned car parts
 banParts = {55 :'engine',     # open wheels

@@ -8,9 +8,10 @@ stageLen = 48
 # write = True для файлов, которые будем изменять
 #   остальные просто читаем для получения доп. данных
 # ПРИ ДОБАВЛЕНИИ ФАЙЛОВ ОБЯЗАТЕЛЬНО ДОБАВИТЬ В F.readAll()._preCheck()._getClass()
-files = {'champ' :{'file':'Championships.txt','write':True},
-         'rules' :{'file':'Rule Changes.txt' ,'write':False},
-         'tracks':{'file':'Locations.txt'    ,'write':False}}
+files = {'champ'  :{'file':'Championships.txt','write':True},
+         'chassis':{'file':'Chassis.txt'      ,'write':True},
+         'rules'  :{'file':'Rule Changes.txt' ,'write':False},
+         'tracks' :{'file':'Locations.txt'    ,'write':False}}
 
 ######### цвета
 colors = {'blk':{'code':'\033[30m'},  # black
