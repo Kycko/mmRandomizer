@@ -30,13 +30,14 @@ def error(key:str,extra=[]):
   for string in extra: print(string)
 
 class Progress():
-  def stage (self,stgKey:str):
+  def stageTitle(self,ttlKey:str): print(['stages',ttlKey])
+  def stage     (self,stgKey:str):
     def _align(txt:str):
       length = len(SF.cutColors(txt))
       for i in range(length,G.stageLen): txt += '.'
       return txt
     print(_align(S.msg['stages'][stgKey]),False)
-  def status(self,status:bool,tip=''):
+  def status    (self,status:bool,tip=''):
     # для сокращения кода возвращаем этот же статус
     # tip = любой текст, будет выведен в скобках
     final = S.status[status]

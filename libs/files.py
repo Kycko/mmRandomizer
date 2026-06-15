@@ -48,8 +48,12 @@ class Championships(File):
   def save     (self,type:str,data:dict):
     # это не запись в файл, это сохранение в основное хранилище
     for line in self.lines:
-      # print(data[line['Acronym']])  # DEBUG
-      line[type] = ';'.join(data[line['Acronym']])
+      if line['Acronym'] in data.keys():
+        final = data[line['Acronym']]
+        for i in range(len(final)): final[i] = str(final[i])
+        # print(final)  # DEBUG
+        line[type] = ';'.join(final)
+
   def genTracks(self,db:Tracks):
     def _getCounts ():
       # IEC-B MUST have the same tracks
@@ -109,11 +113,12 @@ class Championships(File):
         for  country in main:
           if country not in _trim(added,halfnum): final.append(country)
         return final
+      genDB     = G.gen.champs[champ]['tracks']
       final     = []
       countries = []
       halfnum   = round(count/2)
-      doubles   = G.gen.champs[champ]['doubles']
-      roster    = deepcopy(dbroster[G.gen.champs[champ]['roster']])
+      doubles   = genDB['doubles']
+      roster    = deepcopy(dbroster[genDB['roster']])
 
       for i in range(count):
         allowed = _getAllowed(list(roster.keys()),countries,halfnum)
@@ -174,6 +179,31 @@ class Championships(File):
     self.save('Rules',final)
     O.progress.status(True)
     # _debug(final) # внутри есть ДВА РАЗНЫХ ВАРИАНТА
+  def moveTeams(self):  # moves the teams to get the final 12-10-8
+    def _getDB ():      # collect all the teams by category
+      final = {}        # {OW:[2,...,31],GT:[32,...,51]}
+      for line in self.lines:
+        if 'IEC' not in line['Acronym']:
+          series = G.gen.champs[line['Acronym']]['series']
+          if series not in final.keys(): final[series] = []
+          for team in line['Teams'].split(';'): final[series].append(int(team))
+
+      for teams in final.values(): teams.sort() # additional check
+      return final
+    O.progress.stage('moveTeams')
+    final = {}
+    db    = _getDB()
+    for champ,conf in G.gen.champs.items():
+      if 'teams' in conf:
+        final[champ] = []
+        for i in range(conf['teams']):
+          final[champ].append(db[conf['series']].pop(0))
+    self.save('Teams',final)
+    O.progress.status(True)
+
+    # DEBUG
+    # for champ,teams in final.items():
+    #   print(champ.ljust(5) + ' : ' + str(teams))
 class Rules        (File):
   def read(self):
     def _groups():
@@ -320,11 +350,9 @@ def readAll  ():
   return files
 def writeAll (files:dict):
   def _print (created:list):
-    O.print()
-    O.print(S.separator)
+    O.print(); O.print()
     for msg  in S.msg['info']['final']: O.print(msg)
     for file in created               : O.print('   ' + file)
-
   O.progress.stage('write')
   created = []
   for  file in files.values():

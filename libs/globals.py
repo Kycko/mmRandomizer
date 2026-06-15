@@ -2,7 +2,7 @@ from   sys import exit  as SYSEXIT
 import globalsGenerator as gen
 
 ######### максимальная длина сообщений, показывающих прогресс (stages)
-stageLen = 35
+stageLen = 48
 
 # эти базовые вещи должны быть здесь, в globals
 # write = True для файлов, которые будем изменять
@@ -48,7 +48,7 @@ regions = {'Australia'         :'ap',
            'UnitedStates'      :'ap'}
 
 # чемпионаты
-champList = [abbr for abbr in gen.champs.keys()] + ['IEC-B']
+champList = [abbr for abbr in gen.champs.keys()]
 
 # защита от запуска модуля
 if __name__ == '__main__':

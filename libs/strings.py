@@ -7,21 +7,27 @@ status = {True:'$grn$OK$rst$',False:'$red$FAILED$rst$'}
 
 msg = {
   'errors':{
-    'addArg'       :'$red$Добавьте путь к каталогу, в котором лежат ОРИГИНАЛЬНЫЕ файлы базы данных.$rst$',
-    'argIsNotDir'  :'$red$Это не каталог$rst$',
-    'noFilesToRead':'$red$Эти файлы не найдены в указанном каталоге$rst$:',
-    'rmFilesToRun' :'$red$Для запуска уберите эти файлы из текущего каталога$rst$:'
+    'addArg'       :"$red$Add the path to the directory with ORIGINAL game's database files.$rst$",
+    'argIsNotDir'  :'$red$This path is not a directory$rst$',
+    'noFilesToRead':'$red$These files were not found in the defined directory$rst$:',
+    'rmFilesToRun' :'$red$(Re)move these files from the current directory to launch$rst$:'
     },
   'info'  :{
-    'final'        :['$grn$Завершено УСПЕШНО$rst$',
-                     'Созданные файлы:']
+    'final'        :['$grn$Finished SUCCESSFULLY$rst$',
+                     'Files created:']
     },
-  'stages':{
-    'preCheck'     :'Предварительные проверки',
-    'read'         :'Читаем базу игры',
-    'genTracks'    :'Генерируем календари чемпионатов',
-    'genRules'     :'Генерируем правила чемпионатов',
-    'write'        :'Записываем результаты в файлы'
+  'stages':{  # ttl = title
+    'ttlPre'       :'$ylw$------- Prepare$rst$',
+    'preCheck'     :'Pre-checks',
+    'read'         :'Reading the game database',
+
+    'ttlGen'       :'$ylw$------- Generation & other changes$rst$',
+    'genTracks'    :'Generating the calendars',
+    'genRules'     :'Generating the championships rules',
+    'moveTeams'    :'Changing the number of teams per championship',
+
+    'ttlFin'       :'$ylw$------- Finalize$rst$',
+    'write'        :'Writing the resulting files'
     }
   }
 

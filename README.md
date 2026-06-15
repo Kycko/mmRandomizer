@@ -15,6 +15,10 @@ All these changes lead to a more interesting play each time you create the new c
 
 See the more in-depth description in the `README (generator).md` file.
 
+## IMPORTANT
+
+As I know you <u>should</u> have the endurance series DLC to use the generated files. This DLC brought to the game the updated track models (mainly the garages for 12 teams) and maybe some other systems. Maybe the modded files will work even without endurance DLC, <u>I don't know</u>.
+
 # Usage
 
 1. Extract all the text assets from the original `resources.assets` file. You can use any tool for this purpose or my another script: https://github.com/Kycko/mmExtractor;

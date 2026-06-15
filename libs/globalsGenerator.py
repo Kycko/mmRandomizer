@@ -1,45 +1,57 @@
 from sys import exit as SYSEXIT
 
-######### для копирования IEC-A → IEC-B
-# можно использовать и в других местах
+######### for copying IEC-A → IEC-B
+# but may be used in other places too
 copySign = '$copy$'
 
-######### чемпионаты
-# 'doubles' = может ли быть две гонки в одной стране
-# календари IEC-A и IEC-B ВСЕГДА ДОЛЖНЫ БЫТЬ ОДИНАКОВЫ!
-champs = {'WMC'  :{'roster':'int','doubles':False},
-          'APS'  :{'roster':'ap' ,'doubles':True },
-          'ERS'  :{'roster':'eu' ,'doubles':True },
-          'IGTC' :{'roster':'int','doubles':False},
-          'GTCS' :{'roster':'int','doubles':True },
-          'IEC-A':{'roster':'int','doubles':False}}
+######### championships
+# 'doubles' = can have two races in one country
+# DON'T CHANGE the number of teams for IEC!
+# calendars for IEC-A & IEC-B SHOULD BE ALWAYS FULLY EQUAL!
+champs = {'WMC'  :{'series':'OW',   # open wheels
+                   'teams' :12,
+                   'tracks':{'roster':'int','doubles':False}},
+          'APS'  :{'series':'OW',
+                   'teams' :10,
+                   'tracks':{'roster':'ap' ,'doubles':True}},
+          'ERS'  :{'series':'OW',
+                   'teams' :8,
+                   'tracks':{'roster':'eu' ,'doubles':True}},
+          'IGTC' :{'series':'GT',   # GT
+                   'teams' :11,
+                   'tracks':{'roster':'int','doubles':False}},
+          'GTCS' :{'series':'GT',
+                   'teams' :9,
+                   'tracks':{'roster':'int','doubles':True}},
+          'IEC-A':{'tracks':{'roster':'int','doubles':False}},
+          'IEC-B':{'tracks':None}}
 
-######### ID правил, запрещающих разработку деталей
-banParts = {55 :'движок',       # открытые колёса
-            57 :'коробка передач',
-            59 :'переднее крыло',
-            61 :'заднее крыло',
-            63 :'подвеска',
-            65 :'тормоза',
-            83 :'заднее крыло', # GT
-            85 :'подвеска',
-            87 :'тормоза',
-            89 :'движок',
-            91 :'коробка передач',
-            104:'движок',       # endurance
-            106:'коробка передач',
-            108:'переднее крыло',
-            110:'заднее крыло',
-            112:'подвеска',
-            114:'тормоза'}
+######### IDs for banned car parts
+banParts = {55 :'engine',     # open wheels
+            57 :'gearbox',
+            59 :'front wing',
+            61 :'rear wing',
+            63 :'suspension',
+            65 :'brakes',
+            83 :'rear wing',  # GT
+            85 :'suspension',
+            87 :'brakes',
+            89 :'engine',
+            91 :'gearbox',
+            104:'engine',     # endurance
+            106:'gearbox',
+            108:'front wing',
+            110:'rear wing',
+            112:'suspension',
+            114:'brakes'}
 
-######### вероятности для генератора правил чемпионатов
-# copySign = копируем из IEC-A в IEC-B
-# по поводу promotion bonus:
-#   ни разу не видел, чтобы он присутствовал в игре
-#   в оригинальной БД НИЧЕГО не добавлено (ни запрет, ни разрешение)
-#   по этим соображениям тоже игнорируем, не добавляем ничего
-# ChargeBasedOnStandings тоже странный, в оригинале не используется
+######### the chances for rules generator
+# copySign = COPY from IEC-A to IEC-B
+# promotion bonus:
+#   I haven't seen it in the game
+#   original game database doesn't have any of promotion bonus IDs
+#   that's why I'm ignoring this rule
+# ChargeBasedOnStandings is strange too, it's not used in the original game
 rules = {
   'PracticeLength'        :{
     'WMC'  :{'1':  0,'2':  0,'3':100},
@@ -284,7 +296,7 @@ rules = {
     'IEC-A':{'67': 0,'68': 0,'69': 0,'70': 0,'103':100},
     'IEC-B':{'67': 0,'68': 0,'69': 0,'70': 0,'103':100}
     },
-  'Sprinklers'            :{    # возможно на будущее шанс включения:
+  'Sprinklers'            :{    # maybe chances for the future:
     'WMC'  :{'71':0,'72':100},  #  4%
     'APS'  :{'71':0,'72':100},  #  7%
     'ERS'  :{'71':0,'72':100},  # 10%
@@ -311,7 +323,7 @@ rules = {
     'IEC-A':{'76':25,'77':25,'78':25,'118':25},
     'IEC-B':{'76':25,'77':25,'78':25,'118':25}
     },
-  'HybridPower'           :{    # добавляем ТОЛЬКО ЕСЛИ ERS ВКЛЮЧЕН
+  'HybridPower'           :{    # added ONLY IF ERS ALLOWED
     'WMC'  :{'79':54,'80':46},
     'APS'  :{'79':18,'80':82},
     'ERS'  :{'79':10,'80':90},

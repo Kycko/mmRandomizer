@@ -149,3 +149,17 @@ Additional check:
 | ERS : not allowed                        |  79% |  86% |  93% |  25% |  25% |  25%  |   25% |
 | hybrid mode (chosen only if ERS allowed) |  54% |  18% |  10% |   6% |   7% |  81%  |   73% |
 | standings based batteries                |   0% |   0% |   0% |   0% |   0% |   0%  |    0% |
+
+# Teams
+
+The number of teams in each championship is changed but not randomized:
+
+| WMC  | APC  | ERS  | IGTC | GTCS | IEC-A | IEC-B |
+| ---  | ---  | ---  | ---  | ---  | ---   | ---   |
+|   12 |   10 |    8 |   11 |    9 |     6 |     6 |
+
+You can change this pre-defined values by editing the `libs/globalsGenerator.py` file, `champs` dictionary. See the `teams` value for each championship.
+
+Be careful here:
+  * Seems the game can not simulate more than 12 teams on one track
+  * Endurance series have much more complex simulation because the both series are racing together, so changing these numbers for IEC-A & IEC-B may lead to unexpected bugs
