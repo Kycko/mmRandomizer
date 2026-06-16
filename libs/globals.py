@@ -6,15 +6,18 @@ stageLen = 48
 
 ######### files
 # this basic variables should be here, in the globals
-# write = True means we will write the new file for the user
-#   others are here to get all the needed data
+# rw = r[ead] / w[rite] / rw (both)
+#   write means we will create the NEW file with the generated data
+#   read  means we need some data from this original DB file
+#   some files we will write, but there's no need to read them
 # when adding the new file here CHECK THE DEFINED CLASS
 #   in F.readAll()._preCheck()._getClass()
-files = {'carParts':{'file':'Default Parts.txt','write':True},
-         'champ'   :{'file':'Championships.txt','write':True},
-         'chassis' :{'file':'Chassis.txt'      ,'write':True},
-         'rules'   :{'file':'Rule Changes.txt' ,'write':False},
-         'tracks'  :{'file':'Locations.txt'    ,'write':False}}
+files = {#'assistants':{'file':'Assistants.txt'   ,'rw': 'w'},
+         'carParts'  :{'file':'Default Parts.txt','rw':'rw'},
+         'champ'     :{'file':'Championships.txt','rw':'rw'},
+         'chassis'   :{'file':'Chassis.txt'      ,'rw':'rw'},
+         'rules'     :{'file':'Rule Changes.txt' ,'rw':'r' },
+         'tracks'    :{'file':'Locations.txt'    ,'rw':'r' }}
 # where to write the resulting files (relative to the script path)
 writeDirPrefix = 'result_'
 

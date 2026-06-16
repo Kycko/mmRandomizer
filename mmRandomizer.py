@@ -13,6 +13,7 @@ O.progress.stageTitle('ttlGen')
 files['champ'].genTracks(files['tracks'])
 files['champ'].genRules (files['rules'])
 files['champ'].moveTeams(files)
+# files['assistants'].gen()
 
 O.progress.stageTitle('ttlFin')
 F.writeAll(files)

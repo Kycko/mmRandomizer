@@ -10,13 +10,14 @@ import output              as O
 import stringFuncs         as SF
 import strings             as S
 
-# shared class
-class File():
-  def __init__(self,dir:str,writePath:str,file:str,write:bool):
+# shared classes
+class File  ():
+  def __init__(self,dir:str,writePath:str,file:str,rw:str):
     self.name       = file
     self.path       = os.path.join(dir,file)
     self.writePath  = os.path.join(writePath,file)
-    self.finalWrite = write # будем ли записывать итоги
+    self.toRead     = 'r' in rw # needs reading the original DB
+    self.finalWrite = 'w' in rw # will write the results
   def read    (self):
     with  open(self.path,'r',encoding='utf-8') as f:
       csv = DictReader(f)
@@ -31,6 +32,8 @@ class File():
       joined = ','.join(list(line.values()))
       final.append(joined)
     _write(final)
+class People(File):
+  pass
 
 # per-file classes
 class Championships(File):
@@ -366,6 +369,9 @@ class Tracks       (File):
     #     print('   ' + country + ' : ' + str(tracks))
     # print()
 
+class Assistants(People):
+  pass
+
 # functions for multiple files
 def checkFile(path:str):  # проверяет наличие файла
   return os.path.isfile(path)
@@ -388,12 +394,13 @@ def readAll  ():
       _error(errObj,False)
     def _getClass    (key   :str):
       match key:
-        case 'carParts': return CarParts
-        case 'champ'   : return Championships
-        case 'chassis' : return Chassis
-        case 'rules'   : return Rules
-        case 'tracks'  : return Tracks
-        case _         : return File
+        case 'assistants': return Assistants
+        case 'carParts'  : return CarParts
+        case 'champ'     : return Championships
+        case 'chassis'   : return Chassis
+        case 'rules'     : return Rules
+        case 'tracks'    : return Tracks
+        case _           : return File
     def _checkFiles  (files :dict,key  :str):
       res = []
       for file in files[key].values():
@@ -412,18 +419,21 @@ def readAll  ():
     O.progress.stage('preCheck')
     if not os.path.isdir(dir): _error({'key':'argIsNotDir'},False)
     writeDir = _findWriteDir()
-    files = {'read':{},'write':{}}
+
+    files = {'all':{},'read':{},'write':{}}
     for key,obj in G.files.items():
       fileObj = _getClass(key)(dir,writeDir,**obj)
-      files['read'][key] = fileObj
-      if obj['write']: files['write'][key] = fileObj
+      files['all' ][key] = fileObj
+      if 'r' in obj['rw']: files['read' ][key] = fileObj
+      if 'w' in obj['rw']: files['write'][key] = fileObj
     _checkFiles(files,'read')
     _checkFiles(files,'write')
     O.progress.status(True)
-    return files['read']
+    return files['all']
   files = _preCheck(GF.getArg())
   O.progress.stage('read')
-  for file in files.values(): file.read()
+  for file in files.values():
+    if file.toRead: file.read()
   O.progress.status(True)
   return files
 def writeAll (files:dict):
