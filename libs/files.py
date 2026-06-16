@@ -1,7 +1,7 @@
 import random
+import os
 from   copy    import deepcopy
 from   csv     import DictReader
-from   os      import path as osPath
 from   sys     import exit as SYSEXIT
 import globalFuncs         as GF
 import globals             as G
@@ -12,10 +12,10 @@ import strings             as S
 
 # shared class
 class File():
-  def __init__(self,dir:str,file:str,write:bool):
+  def __init__(self,dir:str,writePath:str,file:str,write:bool):
     self.name       = file
-    self.path       = osPath.join(dir ,file)
-    self.writePath  = osPath.join('./',file)
+    self.path       = os.path.join(dir,file)
+    self.writePath  = os.path.join(writePath,file)
     self.finalWrite = write # будем ли записывать итоги
   def read    (self):
     with  open(self.path,'r',encoding='utf-8') as f:
@@ -368,13 +368,25 @@ class Tracks       (File):
 
 # functions for multiple files
 def checkFile(path:str):  # проверяет наличие файла
-  return osPath.isfile(path)
+  return os.path.isfile(path)
 def readAll  ():
   def _preCheck(dir:str):
-    def _error     (errObj:dict,final:bool):
+    def _error       (errObj:dict,final:bool):
       O.progress.status(False)
+      print()
       GF.error(**errObj)
-    def _getClass  (key   :str):
+    def _findWriteDir():
+      for i in range(1000):
+        num = str(i)
+        # get the '001' format
+        for l in range(3-len(num)): num = '0'+num
+        dir = './' + G.writeDirPrefix + num
+        os.makedirs(dir,exist_ok=True)
+        if not os.listdir(dir): return dir
+      errObj = {'key'  :'noDirsToWrite0',
+                'extra':S.msg['errors']['noDirsToWrite1']}
+      _error(errObj,False)
+    def _getClass    (key   :str):
       match key:
         case 'carParts': return CarParts
         case 'champ'   : return Championships
@@ -382,7 +394,7 @@ def readAll  ():
         case 'rules'   : return Rules
         case 'tracks'  : return Tracks
         case _         : return File
-    def _checkFiles(files :dict,key  :str):
+    def _checkFiles  (files :dict,key  :str):
       res = []
       for file in files[key].values():
         path  = file.path if key == 'read' else file.writePath
@@ -398,10 +410,11 @@ def readAll  ():
                key == 'write')
 
     O.progress.stage('preCheck')
-    if not osPath.isdir(dir): _error({'key':'argIsNotDir'},False)
+    if not os.path.isdir(dir): _error({'key':'argIsNotDir'},False)
+    writeDir = _findWriteDir()
     files = {'read':{},'write':{}}
     for key,obj in G.files.items():
-      fileObj = _getClass(key)(dir,**obj)
+      fileObj = _getClass(key)(dir,writeDir,**obj)
       files['read'][key] = fileObj
       if obj['write']: files['write'][key] = fileObj
     _checkFiles(files,'read')
@@ -417,11 +430,11 @@ def writeAll (files:dict):
   def _print (created:list):
     O.print(); O.print()
     for msg  in S.msg['info']['final']: O.print(msg)
-    for file in created               : O.print('   ' + file)
+    for file in sorted(created)       : O.print('   ' + file)
   O.progress.stage('write')
   created = []
   for  file in files.values():
-    if file.finalWrite: file.write(); created.append(file.name)
+    if file.finalWrite: file.write(); created.append(file.writePath)
   O.progress.status(True)
   _print(created)
 

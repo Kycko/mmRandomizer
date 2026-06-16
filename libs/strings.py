@@ -7,13 +7,18 @@ status = {True:'$grn$OK$rst$',False:'$red$FAILED$rst$'}
 
 msg = {
   'errors':{
-    'addArg'       :"$red$Add the path to the directory with ORIGINAL game's database files.$rst$",
-    'argIsNotDir'  :'$red$This path is not a directory$rst$',
-    'noFilesToRead':'$red$These files were not found in the defined directory$rst$:',
-    'rmFilesToRun' :'$red$(Re)move these files from the current directory to launch$rst$:',
-    'teamsCount'   :'$red$You have defined the wrong number of teams for WMC + APC + ERS$rst$',
-    'teamsCount30' :'$red$Should be 30 in total$rst$',
-    'teamsCount12' :'$red$No one championship can have more than 12 teams$rst$'
+    'addArg'        :"$red$Add the path to the directory with ORIGINAL game's database files.$rst$",
+    'argIsNotDir'   :'$red$This path is not a directory$rst$',
+    'noDirsToWrite0':'$red$The script can not write the final result$rst$',
+    'noDirsToWrite1':[
+      "It can use any of 1000 directory names from './random_000' to './random_999'",
+      '   but all these directories have some files'
+      ],
+    'noFilesToRead' :'$red$These files were not found in the defined directory$rst$:',
+    'rmFilesToRun'  :'$red$(Re)move these files from the current directory to launch$rst$:',
+    'teamsCount'    :'$red$You have defined the wrong number of teams for WMC + APC + ERS$rst$',
+    'teamsCount30'  :'$red$Should be 30 in total$rst$',
+    'teamsCount12'  :'$red$No one championship can have more than 12 teams$rst$'
     },
   'info'  :{
     'final'        :['$grn$Finished SUCCESSFULLY$rst$',

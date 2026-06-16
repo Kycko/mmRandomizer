@@ -24,7 +24,7 @@ As I know you <u>should</u> have the endurance series DLC to use the generated f
 1. Extract all the text assets from the original `resources.assets` file. You can use any tool for this purpose or my another script: https://github.com/Kycko/mmExtractor;
 2. Add the executable bit for this script: `chmod +x ./mmRandomizer.py`;
 3. Run the script with the path to the directory with your extracted original data (where all the `.txt` files are): `./mmRandomizer.py PATH`;
-4. If the script finishes with no errors, you will see a bunch of `.txt` files in the same directory where the script was launched.
+4. If the script finishes with no errors, you will see a bunch of `.txt` files in the `result_***` subdirectory.
 
 ## What to do with the created files
 

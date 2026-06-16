@@ -1,20 +1,24 @@
 from   sys import exit  as SYSEXIT
 import globalsGenerator as gen
 
-######### максимальная длина сообщений, показывающих прогресс (stages)
+######### maximum status messages length
 stageLen = 48
 
-# эти базовые вещи должны быть здесь, в globals
-# write = True для файлов, которые будем изменять
-#   остальные просто читаем для получения доп. данных
-# ПРИ ДОБАВЛЕНИИ ФАЙЛОВ ОБЯЗАТЕЛЬНО ДОБАВИТЬ В F.readAll()._preCheck()._getClass()
+######### files
+# this basic variables should be here, in the globals
+# write = True means we will write the new file for the user
+#   others are here to get all the needed data
+# when adding the new file here CHECK THE DEFINED CLASS
+#   in F.readAll()._preCheck()._getClass()
 files = {'carParts':{'file':'Default Parts.txt','write':True},
          'champ'   :{'file':'Championships.txt','write':True},
          'chassis' :{'file':'Chassis.txt'      ,'write':True},
          'rules'   :{'file':'Rule Changes.txt' ,'write':False},
          'tracks'  :{'file':'Locations.txt'    ,'write':False}}
+# where to write the resulting files (relative to the script path)
+writeDirPrefix = 'result_'
 
-######### цвета
+######### colors
 colors = {'blk':{'code':'\033[30m'},  # black
           'red':{'code':'\033[31m'},  # red
           'grn':{'code':'\033[32m'},  # green
@@ -27,10 +31,10 @@ colors = {'blk':{'code':'\033[30m'},  # black
           'bld':{'code':'\033[1m' },  # bold
           'rst':{'code':'\033[0m' }}  # reset all colors
 for clr,sub in colors.items(): sub['rpl'] = '$'+clr+'$'
-# красный bold выглядит лучше
+# red bold is better than just red
 colors['red']['code'] = colors['bld']['code'] + colors['red']['code']
 
-######### страны/регионы
+######### countries/regions
 # eu = Europe / ap = Asia-Pasific (= non-Europe)
 regions = {'Australia'         :'ap',
            'Belgium'           :'eu',
@@ -49,10 +53,9 @@ regions = {'Australia'         :'ap',
            'UnitedArabEmirates':'ap',
            'UnitedStates'      :'ap'}
 
-# чемпионаты
+# championships
 champList = [abbr for abbr in gen.champs.keys()]
 
-# защита от запуска модуля
 if __name__ == '__main__':
   print  ("This is module, please don't execute.")
   SYSEXIT()
