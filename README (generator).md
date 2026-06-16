@@ -160,6 +160,22 @@ The number of teams in each championship is changed but not randomized:
 
 You can change this pre-defined values by editing the `libs/globalsGenerator.py` file, `champs` dictionary. See the `teams` value for each championship.
 
+
 Be careful here:
   * Seems the game can not simulate more than 12 teams on one track
   * Endurance series have much more complex simulation because the both series are racing together, so changing these numbers for IEC-A & IEC-B may lead to unexpected bugs
+  * <u>WARNING</u>: 11 and 12 teams allowed only for WMC + both GT series
+    * APC & ERS with these numbers will raise an error
+      * Making this possible needs additional code writing to generate good stats for the commands, but this is not what I'm interested in
+
+## Car parts
+
+I don't want to randomize the cars stats because I want the same original balance, with the same teams winning races, the same middles etc. This is primarily because we all know the reference teams for each one (for example, Ferrari for Rossini) and I don't want to see such teams in the end of the table.
+
+The only thing the script will do is fine-tuning to match the changed number of teams in each championship:
+
+* No changes for ERS teams because we get the last 8 ones and can use the same numbers
+* All the stats for APC teams (teams 11-20) are copied to the new teams (13-22): from team 12 to team 14, from team 17 to team 19 etc.
+* Teams 11 & 12 are now in WMC so they will get the new stats matching WMC level
+* No changes for GT series because the stats of the last IGTC teams are equal with the stats of the first GTCS teams
+* No changes for endurance series because the number of teams stays unchanged

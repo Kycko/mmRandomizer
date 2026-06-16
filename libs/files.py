@@ -179,7 +179,7 @@ class Championships(File):
     self.save('Rules',final)
     O.progress.status(True)
     # _debug(final) # внутри есть ДВА РАЗНЫХ ВАРИАНТА
-  def moveTeams(self,fileChassis:Chassis):
+  def moveTeams(self,files:dict):
     # moves the teams to get the final 12-10-8
     def _getDB ():      # collect all the teams by category
       final = {}        # {OW:[2,...,31],GT:[32,...,51]}
@@ -202,13 +202,66 @@ class Championships(File):
           teamID = db[conf['series']].pop(0)
           teams[str(teamID)] = str(conf['ID'])
           final[champ].append(teamID)
-    fileChassis.moveTeams(teams)
+    files['chassis' ].moveTeams(teams)
+    files['carParts'].moveTeams()
     self.save('Teams',final)
     O.progress.status(True)
 
     # DEBUG
     # for champ,teams in final.items():
     #   print(champ.ljust(5) + ' : ' + str(teams))
+class CarParts     (File):
+  def read(self):
+    super().read()
+    # ↓ store the LINKS to THE SAME DICTS from self.lines here
+    self.byTeam = {}  # {teamID:[dict_from_self.lines,...],...}
+    self.sorter = []  # save the part types for final sorting
+    for line in self.lines:
+      if line['Part Type'] not in self.sorter:
+        self.sorter.append(line['Part Type'])
+      teamID = int(line['Team'])
+      if teamID not in self.byTeam.keys(): self.byTeam[teamID] = []
+      self.byTeam[teamID].append(line)
+  def moveTeams(self):
+    def _checkErrors(counts:list):
+      chkTotal = sum(counts) != 30
+      chkParts = any(part > 12 for part in counts)
+      if chkTotal or chkParts:
+        O.progress.status(False)
+        errKey = 'teamsCount30' if chkTotal else 'teamsCount12'
+        GF.error('teamsCount',[S.msg['errors'][errKey]])
+    def _get        (champ :str,ID:int,cnt:int):
+      if champ == 'WMC' and cnt > 9: return G.gen.newCarParts[ID]
+      if champ == 'APS':
+        lines = self.byTeam[cnt+12]
+        for line in lines: line['Team'] = str(ID)
+        return lines
+      return self.byTeam[ID]
+    def _sort       (lines :list):
+      self.lines = []
+      for    type in self.sorter:
+        for  line in lines:
+          if line['Part Type'] == type: self.lines.append(line)
+
+    cChamps = ('WMC','APS','ERS')
+    counts = [G.gen.champs[champ]['teams'] for champ in cChamps]
+    _checkErrors(counts)
+    IDs = sorted(list(self.byTeam.keys()))
+
+    collector = []  # can reset here, we will fill it again
+    for   c in range(len(cChamps)): # WMC/APC/ERS
+      for i in range(counts[c]):
+        collector += _get(cChamps[c],IDs.pop(0),i)
+    # other championships
+    for id in IDs: collector += self.byTeam[id]
+
+    # sort to follow original database structure
+    _sort(collector)
+
+    # DEBUG
+    # print(); print()
+    # for line in self.lines: print(line)
+    # print()
 class Chassis      (File):
   def moveTeams(self,IDs:dict):
     for line in self.lines:
@@ -323,11 +376,12 @@ def readAll  ():
       GF.error(**errObj)
     def _getClass  (key   :str):
       match key:
-        case 'champ'  : return Championships
-        case 'chassis': return Chassis
-        case 'rules'  : return Rules
-        case 'tracks' : return Tracks
-        case _        : return File
+        case 'carParts': return CarParts
+        case 'champ'   : return Championships
+        case 'chassis' : return Chassis
+        case 'rules'   : return Rules
+        case 'tracks'  : return Tracks
+        case _         : return File
     def _checkFiles(files :dict,key  :str):
       res = []
       for file in files[key].values():
